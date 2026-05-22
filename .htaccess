@@ -1,0 +1,8 @@
+RewriteEngine On
+
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Front controller (industry standard: only public/ is web-exposed)
+RewriteRule ^api(?:/v1)?(?:/.*)?$ public/index.php [QSA,L]
+RewriteRule ^public/(.*)$ public/$1 [QSA,L]

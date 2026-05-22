@@ -1,0 +1,44 @@
+# Staging — uses GCP Cloud SQL (staging instance). DB credentials via .env.staging on the server.
+# Usage: docker compose -f docker-compose.staging.yml --env-file .env.staging up -d
+
+services:
+  api:
+    image: ${REGISTRY}/todo-api:${IMAGE_TAG:-staging}
+    container_name: todo-api-staging
+    restart: unless-stopped
+    env_file:
+      - .env.staging
+    environment:
+      APP_ENV: staging
+      APP_DEBUG: ${APP_DEBUG:-false}
+    networks:
+      - todo-net
+    # Uncomment if using Cloud SQL Auth Proxy on the same host:
+    # depends_on:
+    #   - cloud-sql-proxy
+
+  web:
+    image: ${REGISTRY}/todo-web:${IMAGE_TAG:-staging}
+    container_name: todo-web-staging
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    depends_on:
+      - api
+    networks:
+      - todo-net
+
+  # Optional: Cloud SQL Auth Proxy (staging instance)
+  # cloud-sql-proxy:
+  #   image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.1
+  #   command:
+  #     - "--structured-logs"
+  #     - "--port=3306"
+  #     - "${GCP_PROJECT}:${GCP_REGION}:${CLOUD_SQL_INSTANCE_STAGING}"
+  #   restart: unless-stopped
+  #   networks:
+  #     - todo-net
+
+networks:
+  todo-net:
+    driver: bridge

@@ -1,0 +1,12 @@
+/vendor/
+.phpunit.cache/
+composer.phar
+.env
+.env.staging
+.env.production
+.env.local
+.idea/
+.vscode/
+*.log
+frontend/node_modules
+frontend/dist

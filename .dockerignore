@@ -1,0 +1,16 @@
+.git
+.github
+.idea
+.vscode
+*.md
+!docker/**
+frontend/node_modules
+frontend/dist
+vendor
+.env
+.env.*
+!.env.*.example
+install.php
+composer.phar
+debug_install.php
+terminals

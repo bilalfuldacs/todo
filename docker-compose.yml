@@ -1,0 +1,33 @@
+# Local development with Docker (optional). DB still points to your host or Cloud SQL via .env.local
+# Usage: docker compose --env-file .env.local up --build
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    container_name: todo-api-local
+    env_file:
+      - .env.local
+    ports:
+      - "8081:80"
+    networks:
+      - todo-net
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+      args:
+        VITE_API_URL: /api/v1
+    container_name: todo-web-local
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    networks:
+      - todo-net
+
+networks:
+  todo-net:
+    driver: bridge
