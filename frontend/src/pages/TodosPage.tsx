@@ -6,18 +6,46 @@ import type { Todo } from '../types'
 
 type Filter = 'all' | 'active' | 'completed'
 
+function completedParam(filter: Filter): '0' | '1' | undefined {
+  if (filter === 'all') return undefined
+  return filter === 'completed' ? '1' : '0'
+}
+
 export function TodosPage() {
   const [todos, setTodos] = useState<Todo[]>([])
   const [filter, setFilter] = useState<Filter>('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const loadTodos = useCallback(async () => {
+  useEffect(() => {
+    let cancelled = false
+
+    async function fetchTodos() {
+      try {
+        const res = await api.getTodos(completedParam(filter))
+        if (cancelled) return
+        setTodos(res.data?.todos ?? [])
+        setError(null)
+      } catch (err) {
+        if (cancelled) return
+        setError(err instanceof ApiError ? err.message : 'Failed to load todos')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    void fetchTodos()
+
+    return () => {
+      cancelled = true
+    }
+  }, [filter])
+
+  const reloadTodos = useCallback(async () => {
+    setLoading(true)
     setError(null)
     try {
-      const completed =
-        filter === 'all' ? undefined : filter === 'completed' ? ('1' as const) : ('0' as const)
-      const res = await api.getTodos(completed)
+      const res = await api.getTodos(completedParam(filter))
       setTodos(res.data?.todos ?? [])
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to load todos')
@@ -26,10 +54,10 @@ export function TodosPage() {
     }
   }, [filter])
 
-  useEffect(() => {
+  function selectFilter(next: Filter) {
     setLoading(true)
-    loadTodos()
-  }, [loadTodos])
+    setFilter(next)
+  }
 
   async function handleAdd(title: string, description: string) {
     const res = await api.createTodo(title, description)
@@ -43,7 +71,7 @@ export function TodosPage() {
     if (res.data?.todo) {
       setTodos((prev) => prev.map((t) => (t.id === id ? res.data!.todo : t)))
       if (filter !== 'all') {
-        await loadTodos()
+        await reloadTodos()
       }
     }
   }
@@ -77,7 +105,7 @@ export function TodosPage() {
             role="tab"
             aria-selected={filter === f}
             className={filter === f ? 'active' : ''}
-            onClick={() => setFilter(f)}
+            onClick={() => selectFilter(f)}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
