@@ -55,4 +55,4 @@ tests/
 
 ## CI
 
-`ci.yml` runs `composer test` on every PR and push to `staging` / `main`.
+Run `composer test` locally before pushing changes.
