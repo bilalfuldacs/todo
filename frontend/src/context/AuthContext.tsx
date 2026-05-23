@@ -1,7 +1,5 @@
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -9,17 +7,7 @@ import {
 } from 'react'
 import { api } from '../api/client'
 import type { User } from '../types'
-
-interface AuthContextValue {
-  user: User | null
-  token: string | null
-  loading: boolean
-  login: (email: string, password: string) => Promise<void>
-  register: (name: string, email: string, password: string) => Promise<void>
-  logout: () => Promise<void>
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null)
+import { AuthContext, type AuthContextValue } from './auth-context'
 
 function persistAuth(token: string, user: User) {
   localStorage.setItem('token', token)
@@ -91,18 +79,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }, [])
 
-  const value = useMemo(
+  const value = useMemo<AuthContextValue>(
     () => ({ user, token, loading, login, register, logout }),
     [user, token, loading, login, register, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
-
-export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) {
-    throw new Error('useAuth must be used within AuthProvider')
-  }
-  return ctx
 }
