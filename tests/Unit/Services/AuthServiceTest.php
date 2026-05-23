@@ -25,7 +25,7 @@ final class AuthServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->users = $this->createMock(UserRepositoryInterface::class);
+        $this->users = $this->createMosk(UserRepositoryInterface::class);
         $this->tokens = $this->createMock(TokenRepositoryInterface::class);
         $this->service = new AuthService($this->users, $this->tokens);
     }
