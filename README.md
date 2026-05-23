@@ -37,7 +37,15 @@ todo/
 | CORS & security headers | Configurable origins, `X-Frame-Options`, etc. |
 | Separation of concerns | No SQL in controllers |
 
-## Setup
+## Run with Docker (easiest for others)
+
+```bash
+docker compose up --build
+```
+
+Open **http://localhost:8888** — see **[DOCKER.md](DOCKER.md)**.
+
+## Setup (XAMPP / local)
 
 1. Start **Apache** and **MySQL** in XAMPP.
 2. Copy environment file:
@@ -111,18 +119,30 @@ npm start
 
 Open **http://localhost:5173** — see [frontend/README.md](frontend/README.md).
 
-## Docker & GCP deployment
-
-- **Docker**: `docker/backend`, `docker/frontend` Dockerfiles  
-- **Compose**: `docker-compose.staging.yml`, `docker-compose.prod.yml`  
-- **CI/CD**: `.github/workflows/ci.yml`, `.github/workflows/deploy.yaml`  
-
-Full guide: **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**
-
-## Backend tests
+## Backend tests (local)
 
 ```bash
 composer test
 ```
 
 See **[docs/TESTING.md](docs/TESTING.md)** for mocks vs integration tests.
+
+## CI (GitHub Actions)
+
+On every push or PR to **`staging`** or **`main`**, [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs:
+
+| Job | What it does |
+|-----|----------------|
+| **Backend** | `composer install`, `composer test`, Docker build (`backend/Dockerfile`) |
+| **Frontend** | `npm ci`, `npm run lint`, `npm run build`, Docker build (`frontend/Dockerfile`) |
+
+No deployment to VMs — tests and builds only.
+
+### Branch flow
+
+```
+feature branch → PR → staging  (CI must pass)
+staging        → PR → main     (CI must pass)
+```
+
+Optional: in GitHub **Settings → Branches**, add rules on `staging` and `main` requiring the **CI** check to pass before merge.

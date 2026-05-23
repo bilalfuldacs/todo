@@ -1,0 +1,15 @@
+.git
+.github
+.idea
+.vscode
+*.md
+!README.md
+frontend/node_modules
+frontend/dist
+vendor
+.env
+.env.*
+install.php
+composer.phar
+.phpunit.cache
+tests
